@@ -1,27 +1,32 @@
-<?
+<?php
+
+require __DIR__ . '/../vendor/autoload.php';
 
 $app_config = parse_ini_file('app.ini.php');
 
-setlocale(LC_MONETARY, 'en_US.UTF-8');
+ProfitCalc::set_currency($app_config['currency']);
+
+$input_revenue = '';
+$input_expenses = '';
+if (isset($_POST['revenue'])) {
+	$input_revenue = $_POST['revenue'];
+}
+if (isset($_POST['expenses'])) {
+	$input_expenses = $_POST['expenses'];
+}
 
 $error = null;
 $profit = 0;
 
 if (isset($_POST['submit'])) {
-	
-	$revenue = $_POST['revenue'];
-	$expenses = $_POST['expenses'];
-	
-	if (is_numeric($revenue) && is_numeric($expenses)) {
-		$profit = $revenue - $expenses;
-	}
-	else {
-		$error = "Revenue and Expenses values must be numeric";
+	try {
+		$profit = ProfitCalc::get_profit($input_revenue, $input_expenses);
+	} catch (Exception $err) {
+		$error = $err;
 	}
 }
 
 ?>
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <!--
 Design by Free CSS Templates
@@ -83,24 +88,24 @@ Description: A two-column fixed-width template suitable for small websites.
 
                     <h2 class="title">Profit Calculator</h2> 
 					
-					<? if ($error != null) { ?>
-                    <div class="error"> <?= $error ?> </div>
-					<? } ?>
+					<?php if ($error != null) { ?>
+                    <div class="error"> <?php echo htmlspecialchars($error) ?> </div>
+					<?php } ?>
 					
                     <table cellpadding="0" cellspacing="0" align="center">
                         <thead><tr><th>Line Item</th><th>Amount</th></tr></thead>
                         <tbody>
                             <tr>
                                 <td>Revenue</td>
-								<td><input type="text" name="revenue" value="<?= $_POST['revenue'] ?>" /></td>
+								<td><input type="text" name="revenue" value="<?php htmlspecialchars($input_revenue) ?>" /></td>
                             </tr>
                             <tr>
                                 <td>Expenses</td>
-                                <td><input type="text" name="expenses" value="<?= $_POST['expenses'] ?>" /></td>
+                                <td><input type="text" name="expenses" value="<?php echo htmlspecialchars($input_expenses) ?>" /></td>
                             </tr>
                             <tr>
                                 <td>Net Profit</td>
-                                <td><?= money_format('%.2n', $profit); ?></td>
+                                <td><?php echo htmlspecialchars($profit) ?></td>
                             </tr>
                         </tbody>
                     </table>
@@ -129,10 +134,10 @@ Description: A two-column fixed-width template suitable for small websites.
 					</li>					
 				</ul>
                 <div id="value" class="sideBox">
-                Configuration value: <br /><strong> <?= $app_config["config_value"] ?> </strong>
+                Configuration value: <br /><strong> <?php echo htmlspecialchars($app_config["config_value"]) ?> </strong>
                 </div>
                 <div id="version" class="sideBox">
-                Version: <br /><strong><?= $app_config["version"] ?></strong>
+                Version: <br /><strong><?php echo htmlspecialchars($app_config["version"]) ?></strong>
                 </div>
 			</div>
 			<!-- end div#sidebar -->
