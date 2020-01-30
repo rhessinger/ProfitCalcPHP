@@ -1,4 +1,4 @@
-# ProfitCalcPHP
+# ProfitCalcPHP - Rich Style
 
 A small, simple PHP application used for BuildMaster samples and templates.
 
